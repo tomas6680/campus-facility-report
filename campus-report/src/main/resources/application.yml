@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: campus-report
+  datasource:
+    url: jdbc:postgresql://localhost:5432/campus_report
+    username: postgres
+    password:  ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+logging:
+  level:
+    org.hibernate.SQL: debug
