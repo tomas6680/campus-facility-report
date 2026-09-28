@@ -11,7 +11,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Assignment {
 
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "assignment_id")
+    private Long assignmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "report_id", nullable = false)
