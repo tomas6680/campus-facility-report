@@ -1,0 +1,22 @@
+### 신고 등록
+POST http://localhost:8080/api/reports
+Content-Type: application/json
+
+{
+  "reporterId": 1,
+  "facilityId": 1,
+  "detailLocation": "공학관 3층 남자화장실",
+  "facilityType": "LEAK",
+  "title": "3층 화장실 천장 누수",
+  "content": "천장에서 물이 계속 떨어지고 바닥이 젖어 미끄럽습니다.",
+  "riskLevel": "HIGH"
+}
+
+### 신고 목록 조회
+GET http://localhost:8080/api/reports
+
+### 신고 단건 조회
+GET http://localhost:8080/api/reports/1
+
+### 없는 신고 조회
+GET http://localhost:8080/api/reports/999

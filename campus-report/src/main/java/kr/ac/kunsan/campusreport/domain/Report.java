@@ -54,4 +54,22 @@ public class Report {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    public static Report create(User reporter, Facility facility, String detailLocation,
+                                FacilityType facilityType, String title, String content,
+                                RiskLevel riskLevel) {
+        Report report = new Report();
+        report.reporter = reporter;
+        report.facility = facility;
+        report.detailLocation = detailLocation;
+        report.facilityType = facilityType;
+        report.title = title;
+        report.content = content;
+        report.riskLevel = riskLevel;
+        report.visibility = Visibility.PUBLIC;
+        report.status = ReportStatus.RECEIVED;
+        report.createdAt = LocalDateTime.now();
+        report.updatedAt = LocalDateTime.now();
+        return report;
+    }
 }

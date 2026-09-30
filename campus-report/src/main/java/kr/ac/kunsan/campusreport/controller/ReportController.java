@@ -1,22 +1,34 @@
 package kr.ac.kunsan.campusreport.controller;
 
-import kr.ac.kunsan.campusreport.repository.ReportRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import kr.ac.kunsan.campusreport.dto.ReportCreateRequest;
+import kr.ac.kunsan.campusreport.dto.ReportResponse;
+import kr.ac.kunsan.campusreport.service.ReportService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/reports")
 public class ReportController {
 
-    private final ReportRepository reportRepository;
+    private final ReportService reportService;
 
-    public ReportController(ReportRepository reportRepository) {
-        this.reportRepository = reportRepository;
+    public ReportController(ReportService reportService) {
+        this.reportService = reportService;
     }
 
-    @GetMapping("/count")
-    public long count() {
-        return reportRepository.count();
+    @PostMapping
+    public ReportResponse create(@RequestBody ReportCreateRequest request) {
+        return reportService.create(request);
+    }
+
+    @GetMapping
+    public List<ReportResponse> findAll() {
+        return reportService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ReportResponse findById(@PathVariable Long id) {
+        return reportService.findById(id);
     }
 }
