@@ -27,8 +27,9 @@ public class Report {
     @Column(name = "detail_location", nullable = false)
     private String detailLocation;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "facility_type", nullable = false)
-    private String facilityType;
+    private FacilityType facilityType;
 
     @Column(nullable = false)
     private String title;
@@ -40,8 +41,9 @@ public class Report {
     @Column(name = "risk_level", nullable = false)
     private RiskLevel riskLevel;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String visibility;
+    private Visibility visibility;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
