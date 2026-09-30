@@ -20,11 +20,13 @@ public class StatusHistory {
     @JoinColumn(name = "report_id", nullable = false)
     private Report report;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "from_status", length = 20)
-    private String fromStatus;
+    private ReportStatus fromStatus;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "to_status", nullable = false, length = 20)
-    private String toStatus;
+    private ReportStatus toStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "changed_by", nullable = false)
