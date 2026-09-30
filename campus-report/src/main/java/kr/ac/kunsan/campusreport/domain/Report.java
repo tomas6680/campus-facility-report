@@ -36,14 +36,16 @@ public class Report {
     @Column(nullable = false, columnDefinition = "text")
     private String content;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "risk_level", nullable = false)
-    private String riskLevel;
+    private RiskLevel riskLevel;
 
     @Column(nullable = false)
     private String visibility;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private ReportStatus status;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
