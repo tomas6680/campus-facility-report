@@ -4,6 +4,7 @@ import kr.ac.kunsan.campusreport.dto.ReportCreateRequest;
 import kr.ac.kunsan.campusreport.dto.ReportResponse;
 import kr.ac.kunsan.campusreport.service.ReportService;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class ReportController {
     }
 
     @PostMapping
-    public ReportResponse create(@RequestBody ReportCreateRequest request) {
+    public ReportResponse create(@Valid @RequestBody ReportCreateRequest request) {
         return reportService.create(request);
     }
 

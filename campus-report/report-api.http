@@ -20,3 +20,16 @@ GET http://localhost:8080/api/reports/1
 
 ### 없는 신고 조회
 GET http://localhost:8080/api/reports/999
+
+### 잘못된 요청 (제목 없음)
+POST http://localhost:8080/api/reports
+Content-Type: application/json
+
+{
+  "reporterId": 1,
+  "facilityId": 1,
+  "detailLocation": "테스트",
+  "facilityType": "LEAK",
+  "content": "제목이 없는 요청입니다.",
+  "riskLevel": "HIGH"
+} 
