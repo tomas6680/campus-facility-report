@@ -32,4 +32,15 @@ Content-Type: application/json
   "facilityType": "LEAK",
   "content": "제목이 없는 요청입니다.",
   "riskLevel": "HIGH"
-} 
+}
+
+### 회원가입
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+  "loginId": "test02",
+  "password": "password123",
+  "name": "홍길동",
+  "department": "IT융합통신공학과"
+}
