@@ -10,6 +10,7 @@ import kr.ac.kunsan.campusreport.repository.ReportRepository;
 import kr.ac.kunsan.campusreport.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import kr.ac.kunsan.campusreport.exception.NotFoundException;
 
 import java.util.List;
 
@@ -32,9 +33,9 @@ public class ReportService {
     @Transactional
     public ReportResponse create(ReportCreateRequest request) {
         User reporter = userRepository.findById(request.getReporterId())
-                .orElseThrow(() -> new IllegalArgumentException("신고자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("신고자를 찾을 수 없습니다."));
         Facility facility = facilityRepository.findById(request.getFacilityId())
-                .orElseThrow(() -> new IllegalArgumentException("시설을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("시설을 찾을 수 없습니다."));
 
         Report report = Report.create(
                 reporter, facility, request.getDetailLocation(),
@@ -52,7 +53,7 @@ public class ReportService {
 
     public ReportResponse findById(Long id) {
         Report report = reportRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("신고를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("신고를 찾을 수 없습니다."));
         return ReportResponse.from(report);
     }
 }
