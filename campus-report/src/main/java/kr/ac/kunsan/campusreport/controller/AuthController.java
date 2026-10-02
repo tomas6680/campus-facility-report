@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,6 +28,18 @@ public class AuthController {
     @PostMapping("/signup")
     public UserResponse signup(@Valid @RequestBody SignupRequest request) {
         return authService.signup(request);
+    }
+
+    @GetMapping("/me")
+    public Map<String, Object> me(Authentication authentication) {
+        if (authentication == null) {
+            return Map.of("authenticated", false);
+        }
+        return Map.of(
+                "authenticated", true,
+                "userId", authentication.getName(),
+                "authorities", authentication.getAuthorities().toString()
+        );
     }
 
     @PostMapping("/login")
