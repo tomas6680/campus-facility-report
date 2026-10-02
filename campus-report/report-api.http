@@ -44,3 +44,21 @@ Content-Type: application/json
   "name": "홍길동",
   "department": "IT융합통신공학과"
 }
+
+### 로그인 실패 (비밀번호 틀림)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "loginId": "test02",
+  "password": "wrongpassword"
+}
+
+### 로그인 실패 (없는 아이디)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "loginId": "nobody",
+  "password": "password123"
+}

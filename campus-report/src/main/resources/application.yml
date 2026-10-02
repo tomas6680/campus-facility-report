@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/campus_report
     username: postgres
-    password:  ${DB_PASSWORD}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: validate
@@ -12,6 +12,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
 logging:
   level:
     org.hibernate.SQL: debug
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 3600000

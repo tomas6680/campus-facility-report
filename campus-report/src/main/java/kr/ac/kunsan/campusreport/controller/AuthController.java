@@ -1,6 +1,8 @@
 package kr.ac.kunsan.campusreport.controller;
 
 import jakarta.validation.Valid;
+import kr.ac.kunsan.campusreport.dto.LoginRequest;
+import kr.ac.kunsan.campusreport.dto.LoginResponse;
 import kr.ac.kunsan.campusreport.dto.SignupRequest;
 import kr.ac.kunsan.campusreport.dto.UserResponse;
 import kr.ac.kunsan.campusreport.service.AuthService;
@@ -22,5 +24,10 @@ public class AuthController {
     @PostMapping("/signup")
     public UserResponse signup(@Valid @RequestBody SignupRequest request) {
         return authService.signup(request);
+    }
+
+    @PostMapping("/login")
+    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
+        return authService.login(request);
     }
 }
