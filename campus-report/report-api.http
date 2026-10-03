@@ -1,6 +1,7 @@
 ### 신고 등록
 POST http://localhost:8080/api/reports
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "reporterId": 1,
@@ -14,9 +15,11 @@ Content-Type: application/json
 
 ### 신고 목록 조회
 GET http://localhost:8080/api/reports
+Authorization: Bearer {{token}}
 
 ### 신고 단건 조회
 GET http://localhost:8080/api/reports/1
+Authorization: Bearer {{token}}
 
 ### 없는 신고 조회
 GET http://localhost:8080/api/reports/999
