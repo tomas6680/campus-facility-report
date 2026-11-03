@@ -42,6 +42,7 @@ function ReportListPage() {
     return (
         <div>
             <h2>신고 목록</h2>
+            <button onClick={() => navigate('/reports/new')}>신고 등록</button>
             <table>
                 <thead>
                 <tr>
