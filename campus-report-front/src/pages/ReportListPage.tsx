@@ -56,7 +56,11 @@ function ReportListPage() {
                 </thead>
                 <tbody>
                 {reports.map((report) => (
-                    <tr key={report.id}>
+                    <tr
+                        key={report.id}
+                        onClick={() => navigate(`/reports/${report.id}`)}
+                        style={{ cursor: 'pointer' }}
+                    >
                         <td>{report.id}</td>
                         <td>{report.title}</td>
                         <td>{report.facilityName}</td>
