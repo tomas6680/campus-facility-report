@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 type Report = {
     id: number
@@ -15,6 +16,7 @@ type Report = {
 
 function ReportListPage() {
     const [reports, setReports] = useState<Report[]>([])
+    const navigate = useNavigate()
 
     useEffect(() => {
         const fetchReports = async () => {
@@ -25,6 +27,9 @@ function ReportListPage() {
 
             if (!res.ok) {
                 console.log('조회 실패', res.status)
+                if (res.status === 401 || res.status === 403) {
+                    navigate('/login')
+                }
                 return
             }
 
