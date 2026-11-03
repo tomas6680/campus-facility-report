@@ -36,6 +36,17 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(InvalidStatusChangeException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidStatusChange(InvalidStatusChangeException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "timestamp", LocalDateTime.now().toString(),
+                        "status", 409,
+                        "error", "Conflict",
+                        "message", e.getMessage()
+                ));
+    }
+
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<Map<String, Object>> handleUnauthorized(UnauthorizedException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

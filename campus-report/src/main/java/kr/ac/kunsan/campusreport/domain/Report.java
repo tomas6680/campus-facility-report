@@ -1,6 +1,7 @@
 package kr.ac.kunsan.campusreport.domain;
 
 import jakarta.persistence.*;
+import kr.ac.kunsan.campusreport.exception.InvalidStatusChangeException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
@@ -71,5 +72,18 @@ public class Report {
         report.createdAt = LocalDateTime.now();
         report.updatedAt = LocalDateTime.now();
         return report;
+    }
+
+    public void changeStatus(ReportStatus newStatus) {
+        ReportStatus next = this.status.next();
+        if (next == null) {
+            throw new InvalidStatusChangeException("이미 처리가 완료된 신고입니다.");
+        }
+        if (next != newStatus) {
+            throw new InvalidStatusChangeException(
+                    "현재 상태(" + this.status + ")에서는 " + next + "(으)로만 변경할 수 있습니다.");
+        }
+        this.status = newStatus;
+        this.updatedAt = LocalDateTime.now();
     }
 }

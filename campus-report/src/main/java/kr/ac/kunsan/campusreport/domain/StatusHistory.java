@@ -37,4 +37,16 @@ public class StatusHistory {
 
     @Column(name = "note", length = 500)
     private String note;
+
+    public static StatusHistory create(Report report, ReportStatus fromStatus, ReportStatus toStatus,
+                                       User changedBy, String note) {
+        StatusHistory history = new StatusHistory();
+        history.report = report;
+        history.fromStatus = fromStatus;
+        history.toStatus = toStatus;
+        history.changedBy = changedBy;
+        history.changedAt = LocalDateTime.now();
+        history.note = note;
+        return history;
+    }
 }
