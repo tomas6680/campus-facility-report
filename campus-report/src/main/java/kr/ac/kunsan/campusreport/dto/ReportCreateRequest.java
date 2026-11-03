@@ -14,9 +14,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ReportCreateRequest {
 
-    @NotNull(message = "신고자 ID는 필수입니다.")
-    private Long reporterId;
-
     @NotNull(message = "시설 ID는 필수입니다.")
     private Long facilityId;
 

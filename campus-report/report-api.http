@@ -1,43 +1,4 @@
-### 신고 등록
-POST http://localhost:8080/api/reports
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-{
-  "reporterId": 1,
-  "facilityId": 1,
-  "detailLocation": "공학관 3층 남자화장실",
-  "facilityType": "LEAK",
-  "title": "3층 화장실 천장 누수",
-  "content": "천장에서 물이 계속 떨어지고 바닥이 젖어 미끄럽습니다.",
-  "riskLevel": "HIGH"
-}
-
-### 신고 목록 조회
-GET http://localhost:8080/api/reports
-Authorization: Bearer {{token}}
-
-### 신고 단건 조회
-GET http://localhost:8080/api/reports/1
-Authorization: Bearer {{token}}
-
-### 없는 신고 조회
-GET http://localhost:8080/api/reports/999
-
-### 잘못된 요청 (제목 없음)
-POST http://localhost:8080/api/reports
-Content-Type: application/json
-
-{
-  "reporterId": 1,
-  "facilityId": 1,
-  "detailLocation": "테스트",
-  "facilityType": "LEAK",
-  "content": "제목이 없는 요청입니다.",
-  "riskLevel": "HIGH"
-}
-
-### 회원가입
+### 회원가입 (같은 아이디로 한 번 더 실행하면 409)
 POST http://localhost:8080/api/auth/signup
 Content-Type: application/json
 
@@ -47,6 +8,17 @@ Content-Type: application/json
   "name": "홍길동",
   "department": "IT융합통신공학과"
 }
+
+### 로그인 (토큰 저장)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "loginId": "test02",
+  "password": "password123"
+}
+
+> {% client.global.set("token", response.body.token); %}
 
 ### 로그인 실패 (비밀번호 틀림)
 POST http://localhost:8080/api/auth/login
@@ -66,20 +38,55 @@ Content-Type: application/json
   "password": "password123"
 }
 
-### 로그인 (토큰 저장)
-POST http://localhost:8080/api/auth/login
-Content-Type: application/json
-
-{
-  "loginId": "test02",
-  "password": "password123"
-}
-
-> {% client.global.set("token", response.body.token); %}
-
 ### 내 정보 (토큰 없이)
 GET http://localhost:8080/api/auth/me
 
 ### 내 정보 (토큰 포함)
 GET http://localhost:8080/api/auth/me
+Authorization: Bearer {{token}}
+
+### 신고 등록
+POST http://localhost:8080/api/reports
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "facilityId": 1,
+  "detailLocation": "공학관 3층 남자화장실",
+  "facilityType": "LEAK",
+  "title": "3층 화장실 천장 누수",
+  "content": "천장에서 물이 계속 떨어지고 바닥이 젖어 미끄럽습니다.",
+  "riskLevel": "HIGH"
+}
+
+### 신고 목록 조회
+GET http://localhost:8080/api/reports
+Authorization: Bearer {{token}}
+
+### 신고 목록 조회 (토큰 없이 → 403)
+GET http://localhost:8080/api/reports
+
+### 신고 단건 조회
+GET http://localhost:8080/api/reports/1
+Authorization: Bearer {{token}}
+
+### 없는 신고 조회 (404)
+GET http://localhost:8080/api/reports/999
+Authorization: Bearer {{token}}
+
+### 잘못된 요청: 제목 없음 (400)
+POST http://localhost:8080/api/reports
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "facilityId": 1,
+  "detailLocation": "테스트",
+  "facilityType": "LEAK",
+  "content": "제목이 없는 요청입니다.",
+  "riskLevel": "HIGH"
+}
+
+### 시설 목록 조회
+GET http://localhost:8080/api/facilities
 Authorization: Bearer {{token}}

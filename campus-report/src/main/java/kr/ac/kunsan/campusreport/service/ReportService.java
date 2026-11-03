@@ -31,8 +31,8 @@ public class ReportService {
     }
 
     @Transactional
-    public ReportResponse create(ReportCreateRequest request) {
-        User reporter = userRepository.findById(request.getReporterId())
+    public ReportResponse create(ReportCreateRequest request, Long reporterId) {
+        User reporter = userRepository.findById(reporterId)
                 .orElseThrow(() -> new NotFoundException("신고자를 찾을 수 없습니다."));
         Facility facility = facilityRepository.findById(request.getFacilityId())
                 .orElseThrow(() -> new NotFoundException("시설을 찾을 수 없습니다."));
