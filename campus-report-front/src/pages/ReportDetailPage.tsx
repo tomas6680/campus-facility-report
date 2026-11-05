@@ -59,6 +59,25 @@ function ReportDetailPage() {
     const navigate = useNavigate()
     const [report, setReport] = useState<Report | null>(null)
     const [histories, setHistories] = useState<History[]>([])
+    const [note, setNote] = useState('')
+
+    const role = localStorage.getItem('role')
+    const canChangeStatus = role === 'STAFF' || role === 'ADMIN'
+
+    const fetchHistories = async () => {
+        const token = localStorage.getItem('token')
+        const res = await fetch(`/api/reports/${id}/history`, {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+
+        if (!res.ok) {
+            console.log('이력 조회 실패', res.status)
+            return
+        }
+
+        const data = await res.json()
+        setHistories(data)
+    }
 
     useEffect(() => {
         const fetchReport = async () => {
@@ -82,21 +101,6 @@ function ReportDetailPage() {
             setReport(data)
         }
 
-        const fetchHistories = async () => {
-            const token = localStorage.getItem('token')
-            const res = await fetch(`/api/reports/${id}/history`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-
-            if (!res.ok) {
-                console.log('이력 조회 실패', res.status)
-                return
-            }
-
-            const data = await res.json()
-            setHistories(data)
-        }
-
         fetchReport()
         fetchHistories()
     }, [id])
@@ -106,6 +110,34 @@ function ReportDetailPage() {
     }
 
     const currentStep = STEPS.indexOf(report.status)
+    const nextStatus = STEPS[currentStep + 1]
+
+    const handleChangeStatus = async () => {
+        const token = localStorage.getItem('token')
+        const res = await fetch(`/api/reports/${id}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ status: nextStatus, note: note || null }),
+        })
+
+        if (!res.ok) {
+            if (res.status === 403) {
+                alert('상태를 변경할 권한이 없습니다.')
+                return
+            }
+            const err = await res.json()
+            alert(err.message)
+            return
+        }
+
+        const data = await res.json()
+        setReport(data)
+        setNote('')
+        fetchHistories()
+    }
 
     return (
         <div>
@@ -138,6 +170,19 @@ function ReportDetailPage() {
             </table>
             <h3>내용</h3>
             <p>{report.content}</p>
+            {canChangeStatus && nextStatus && (
+                <div>
+                    <input
+                        type="text"
+                        placeholder="처리 메모 (선택)"
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                    />
+                    <button onClick={handleChangeStatus}>
+                        {STATUS_LABEL[nextStatus]} 단계로 변경
+                    </button>
+                </div>
+            )}
             <h3>처리 이력</h3>
             <table>
                 <thead>

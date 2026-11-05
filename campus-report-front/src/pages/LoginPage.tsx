@@ -21,8 +21,8 @@ function LoginPage() {
 
         const data = await res.json()
         localStorage.setItem('token', data.token)
+        localStorage.setItem('role', data.role)
         navigate('/reports')
-        console.log('로그인 성공', data)
     }
 
     return (
