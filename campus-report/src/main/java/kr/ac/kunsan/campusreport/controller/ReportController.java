@@ -3,6 +3,7 @@ package kr.ac.kunsan.campusreport.controller;
 import kr.ac.kunsan.campusreport.dto.ReportCreateRequest;
 import kr.ac.kunsan.campusreport.dto.ReportResponse;
 import kr.ac.kunsan.campusreport.dto.StatusChangeRequest;
+import kr.ac.kunsan.campusreport.dto.StatusHistoryResponse;
 import kr.ac.kunsan.campusreport.service.ReportService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -43,5 +44,10 @@ public class ReportController {
                                        Authentication authentication) {
         Long changerId = Long.valueOf(authentication.getName());
         return reportService.changeStatus(id, request, changerId);
+    }
+
+    @GetMapping("/{id}/history")
+    public List<StatusHistoryResponse> findHistory(@PathVariable Long id) {
+        return reportService.findHistory(id);
     }
 }

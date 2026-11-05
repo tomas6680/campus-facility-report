@@ -8,6 +8,7 @@ import kr.ac.kunsan.campusreport.domain.User;
 import kr.ac.kunsan.campusreport.dto.ReportCreateRequest;
 import kr.ac.kunsan.campusreport.dto.ReportResponse;
 import kr.ac.kunsan.campusreport.dto.StatusChangeRequest;
+import kr.ac.kunsan.campusreport.dto.StatusHistoryResponse;
 import kr.ac.kunsan.campusreport.exception.NotFoundException;
 import kr.ac.kunsan.campusreport.repository.FacilityRepository;
 import kr.ac.kunsan.campusreport.repository.ReportRepository;
@@ -82,5 +83,14 @@ public class ReportService {
         Report report = reportRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("신고를 찾을 수 없습니다."));
         return ReportResponse.from(report);
+    }
+
+    public List<StatusHistoryResponse> findHistory(Long reportId) {
+        if (!reportRepository.existsById(reportId)) {
+            throw new NotFoundException("신고를 찾을 수 없습니다.");
+        }
+        return statusHistoryRepository.findByReportIdOrderByChangedAtAsc(reportId).stream()
+                .map(StatusHistoryResponse::from)
+                .toList();
     }
 }

@@ -140,3 +140,11 @@ Authorization: Bearer {{token}}
 {
   "status": "IN_PROGRESS"
 }
+
+### 처리 이력 조회 (200, 2건)
+GET http://localhost:8080/api/reports/7/history
+Authorization: Bearer {{token}}
+
+### 없는 주소 (404) - /error 허용 전에는 403으로 가려졌음
+GET http://localhost:8080/api/reports/7/histories
+Authorization: Bearer {{token}}
