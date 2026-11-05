@@ -75,6 +75,7 @@ public class ReportService {
 
     public List<ReportResponse> findAll() {
         return reportRepository.findAll().stream()
+                .sorted(Report.PRIORITY_ORDER)
                 .map(ReportResponse::from)
                 .toList();
     }

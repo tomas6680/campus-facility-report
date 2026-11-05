@@ -5,12 +5,19 @@ import kr.ac.kunsan.campusreport.exception.InvalidStatusChangeException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 
 @Entity
 @Table(name = "reports")
 @Getter
 @NoArgsConstructor
 public class Report {
+
+    // 처리 우선순위: 미완료 먼저 → 위험도 높은 순 → 먼저 접수된 순
+    public static final Comparator<Report> PRIORITY_ORDER =
+            Comparator.comparing((Report report) -> report.getStatus() == ReportStatus.DONE)
+                    .thenComparingInt(report -> report.getRiskLevel().priority())
+                    .thenComparing(Report::getCreatedAt);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
