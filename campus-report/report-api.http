@@ -45,7 +45,7 @@ GET http://localhost:8080/api/auth/me
 GET http://localhost:8080/api/auth/me
 Authorization: Bearer {{token}}
 
-### 신고 등록
+### 신고 등록 (새 신고 번호를 reportId로 저장)
 POST http://localhost:8080/api/reports
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -59,12 +59,18 @@ Authorization: Bearer {{token}}
   "riskLevel": "HIGH"
 }
 
+> {% client.global.set("reportId", response.body.id); %}
+
 ### 신고 목록 조회
 GET http://localhost:8080/api/reports
 Authorization: Bearer {{token}}
 
-### 신고 목록 조회 (토큰 없이 → 403)
+### 신고 목록 조회 (토큰 없이 → 401)
 GET http://localhost:8080/api/reports
+
+### 신고 목록 조회 (위조된 토큰 → 401)
+GET http://localhost:8080/api/reports
+Authorization: Bearer invalid.token.value
 
 ### 신고 단건 조회
 GET http://localhost:8080/api/reports/1
@@ -91,7 +97,7 @@ Authorization: Bearer {{token}}
 GET http://localhost:8080/api/facilities
 Authorization: Bearer {{token}}
 
-### 담당자 회원가입 (test03)
+### 담당자 회원가입 (test03, seed.sql로 이미 있으면 409)
 POST http://localhost:8080/api/auth/signup
 Content-Type: application/json
 
@@ -102,7 +108,7 @@ Content-Type: application/json
   "department": "시설관리팀"
 }
 
-### 담당자 로그인 (토큰 저장) — DB에서 STAFF로 바꾼 뒤 실행
+### 담당자 로그인 (토큰 저장) — test03이 STAFF여야 함 (seed.sql이 처리)
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
@@ -113,8 +119,8 @@ Content-Type: application/json
 
 > {% client.global.set("staffToken", response.body.token); %}
 
-### 상태 변경: 접수 → 확인 (담당자, 200)
-PATCH http://localhost:8080/api/reports/7/status
+### 상태 변경: 접수 → 확인 (담당자, 200) — 위에서 등록한 신고
+PATCH http://localhost:8080/api/reports/{{reportId}}/status
 Content-Type: application/json
 Authorization: Bearer {{staffToken}}
 
@@ -124,7 +130,7 @@ Authorization: Bearer {{staffToken}}
 }
 
 ### 상태 변경: 단계 건너뛰기 (409)
-PATCH http://localhost:8080/api/reports/7/status
+PATCH http://localhost:8080/api/reports/{{reportId}}/status
 Content-Type: application/json
 Authorization: Bearer {{staffToken}}
 
@@ -132,8 +138,8 @@ Authorization: Bearer {{staffToken}}
   "status": "DONE"
 }
 
-### 상태 변경: 신고자가 시도 (403)
-PATCH http://localhost:8080/api/reports/7/status
+### 상태 변경: 신고자가 시도 (403, JSON 응답)
+PATCH http://localhost:8080/api/reports/{{reportId}}/status
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -142,9 +148,9 @@ Authorization: Bearer {{token}}
 }
 
 ### 처리 이력 조회 (200, 2건)
-GET http://localhost:8080/api/reports/7/history
+GET http://localhost:8080/api/reports/{{reportId}}/history
 Authorization: Bearer {{token}}
 
 ### 없는 주소 (404) - /error 허용 전에는 403으로 가려졌음
-GET http://localhost:8080/api/reports/7/histories
+GET http://localhost:8080/api/reports/{{reportId}}/histories
 Authorization: Bearer {{token}}
