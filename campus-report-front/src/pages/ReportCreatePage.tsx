@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { readErrorMessage } from '../api'
 
 type Facility = {
     id: number
@@ -25,7 +26,7 @@ function ReportCreatePage() {
             })
 
             if (!res.ok) {
-                if (res.status === 401 || res.status === 403) {
+                if (res.status === 401) {
                     navigate('/login')
                 }
                 return
@@ -56,16 +57,11 @@ function ReportCreatePage() {
         })
 
         if (!res.ok) {
-            if (res.status === 401 || res.status === 403) {
+            if (res.status === 401) {
                 navigate('/login')
                 return
             }
-            const err = await res.json()
-            if (err.errors) {
-                alert(Object.values(err.errors).join('\n'))
-            } else {
-                alert(err.message)
-            }
+            alert(await readErrorMessage(res))
             return
         }
 

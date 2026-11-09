@@ -40,7 +40,7 @@ function ReportListPage() {
 
             if (!res.ok) {
                 console.log('조회 실패', res.status)
-                if (res.status === 401 || res.status === 403) {
+                if (res.status === 401) {
                     navigate('/login')
                 }
                 return

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { readErrorMessage } from '../api'
 
 function LoginPage() {
     const [loginId, setLoginId] = useState('')
@@ -14,8 +15,7 @@ function LoginPage() {
         })
 
         if (!res.ok) {
-            const err = await res.json()
-            alert(err.message)
+            alert(await readErrorMessage(res))
             return
         }
 

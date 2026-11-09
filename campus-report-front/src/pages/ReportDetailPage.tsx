@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { readErrorMessage } from '../api'
 
 type Report = {
     id: number
@@ -87,12 +88,11 @@ function ReportDetailPage() {
             })
 
             if (!res.ok) {
-                if (res.status === 401 || res.status === 403) {
+                if (res.status === 401) {
                     navigate('/login')
                     return
                 }
-                const err = await res.json()
-                alert(err.message)
+                alert(await readErrorMessage(res))
                 navigate('/reports')
                 return
             }
@@ -124,12 +124,12 @@ function ReportDetailPage() {
         })
 
         if (!res.ok) {
-            if (res.status === 403) {
-                alert('상태를 변경할 권한이 없습니다.')
+            if (res.status === 401) {
+                alert('로그인이 만료됐습니다. 다시 로그인해 주세요.')
+                navigate('/login')
                 return
             }
-            const err = await res.json()
-            alert(err.message)
+            alert(await readErrorMessage(res))
             return
         }
 
