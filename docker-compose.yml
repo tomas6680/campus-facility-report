@@ -1,0 +1,48 @@
+# 캠퍼스 시설 신고 시스템: DB · 백엔드 · 프론트를 명령 한 번으로 실행
+#   1) .env.example을 복사해 .env를 만들고 값을 채운다 (.env는 Git에 올리지 않음)
+#   2) docker compose up --build
+#   3) 브라우저에서 http://localhost:3000
+
+name: campus-report
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: campus_report
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      TZ: Asia/Seoul
+    volumes:
+      - db-data:/var/lib/postgresql/data                              # 데이터 보존 (컨테이너를 지워도 남음)
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro  # 첫 실행 때만: 테이블 생성
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro      # 첫 실행 때만: 시연용 데이터
+    healthcheck:
+      # TCP 접속이 되는 시점 = schema·seed 실행이 끝나고 실제 서버가 뜬 시점
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d campus_report"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    # 포트를 열지 않음: 백엔드만 내부 네트워크(db:5432)로 접속한다. PC에 설치된 PostgreSQL(5432)과도 겹치지 않음
+
+  backend:
+    build: ./campus-report
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/campus_report  # localhost 대신 서비스 이름(db)
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      TZ: Asia/Seoul
+    depends_on:
+      db:
+        condition: service_healthy  # DB 준비가 끝난 뒤에 시작
+    # 포트를 열지 않음: 외부 요청은 frontend(nginx)를 거쳐서만 들어온다
+
+  frontend:
+    build: ./campus-report-front
+    ports:
+      - "3000:80"  # PC의 3000번 → 컨테이너 nginx의 80번
+    depends_on:
+      - backend
+
+volumes:
+  db-data:

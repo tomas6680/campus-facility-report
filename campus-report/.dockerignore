@@ -1,0 +1,6 @@
+# 이미지 빌드에 보내지 않을 파일 (PC에서 만든 빌드 결과·IDE 설정)
+build
+.gradle
+.idea
+*.iml
+out
