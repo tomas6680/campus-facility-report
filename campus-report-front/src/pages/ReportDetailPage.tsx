@@ -61,6 +61,8 @@ function ReportDetailPage() {
     const [report, setReport] = useState<Report | null>(null)
     const [histories, setHistories] = useState<History[]>([])
     const [note, setNote] = useState('')
+    const [actionError, setActionError] = useState('')
+    const [changing, setChanging] = useState(false)
 
     const role = localStorage.getItem('role')
     const canChangeStatus = role === 'STAFF' || role === 'ADMIN'
@@ -106,109 +108,184 @@ function ReportDetailPage() {
     }, [id])
 
     if (!report) {
-        return <p>불러오는 중...</p>
+        return <p className="page-loading">불러오는 중...</p>
     }
 
     const currentStep = STEPS.indexOf(report.status)
     const nextStatus = STEPS[currentStep + 1]
 
     const handleChangeStatus = async () => {
-        const token = localStorage.getItem('token')
-        const res = await fetch(`/api/reports/${id}/status`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ status: nextStatus, note: note || null }),
-        })
+        setActionError('')
+        setChanging(true)
 
-        if (!res.ok) {
-            if (res.status === 401) {
-                alert('로그인이 만료됐습니다. 다시 로그인해 주세요.')
-                navigate('/login')
+        try {
+            const token = localStorage.getItem('token')
+            const res = await fetch(`/api/reports/${id}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ status: nextStatus, note: note || null }),
+            })
+
+            if (!res.ok) {
+                if (res.status === 401) {
+                    alert('로그인이 만료됐습니다. 다시 로그인해 주세요.')
+                    navigate('/login')
+                    return
+                }
+                setActionError(await readErrorMessage(res))
                 return
             }
-            alert(await readErrorMessage(res))
-            return
-        }
 
-        const data = await res.json()
-        setReport(data)
-        setNote('')
-        fetchHistories()
+            const data = await res.json()
+            setReport(data)
+            setNote('')
+            fetchHistories()
+        } catch {
+            setActionError('서버에 연결할 수 없습니다.')
+        } finally {
+            setChanging(false)
+        }
     }
 
     return (
-        <div>
-            <h2>{report.title}</h2>
-            <p>
-                {STEPS.map((step, index) => (
-                    <span key={step}>
-                        {index > 0 && ' → '}
-                        <span
-                            style={{
-                                fontWeight: index === currentStep ? 'bold' : 'normal',
-                                opacity: index > currentStep ? 0.4 : 1,
-                            }}
-                        >
-                            {STATUS_LABEL[step]}
-                        </span>
-                    </span>
-                ))}
-            </p>
-            <table>
-                <tbody>
-                <tr><th>번호</th><td>{report.id}</td></tr>
-                <tr><th>위치</th><td>{report.facilityName} {report.detailLocation}</td></tr>
-                <tr><th>고장 유형</th><td>{FACILITY_TYPE_LABEL[report.facilityType]}</td></tr>
-                <tr><th>위험도</th><td>{RISK_LEVEL_LABEL[report.riskLevel]}</td></tr>
-                <tr><th>상태</th><td>{STATUS_LABEL[report.status]}</td></tr>
-                <tr><th>등록일</th><td>{report.createdAt.replace('T', ' ').slice(0, 16)}</td></tr>
-                <tr><th>수정일</th><td>{report.updatedAt.replace('T', ' ').slice(0, 16)}</td></tr>
-                </tbody>
-            </table>
-            <h3>내용</h3>
-            <p>{report.content}</p>
-            {canChangeStatus && nextStatus && (
+        <>
+            <button type="button" className="back-link" onClick={() => navigate('/reports')}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M15 6l-6 6 6 6" />
+                </svg>
+                목록으로
+            </button>
+
+            <div className="page-head">
                 <div>
-                    <input
-                        type="text"
-                        placeholder="처리 메모 (선택)"
-                        value={note}
-                        onChange={(e) => setNote(e.target.value)}
-                    />
-                    <button onClick={handleChangeStatus}>
-                        {STATUS_LABEL[nextStatus]} 단계로 변경
-                    </button>
+                    <div className="detail-meta">
+                        <span className="detail-id">#{report.id}</span>
+                        <span className={`badge risk-${report.riskLevel.toLowerCase()}`}>
+                            위험도 {RISK_LEVEL_LABEL[report.riskLevel]}
+                        </span>
+                        <span className={`badge status-${report.status.toLowerCase()}`}>
+                            {STATUS_LABEL[report.status]}
+                        </span>
+                    </div>
+                    <h1 className="page-title">{report.title}</h1>
                 </div>
-            )}
-            <h3>처리 이력</h3>
-            <table>
-                <thead>
-                <tr>
-                    <th>일시</th>
-                    <th>상태 변경</th>
-                    <th>처리자</th>
-                    <th>메모</th>
-                </tr>
-                </thead>
-                <tbody>
-                {histories.map((history) => (
-                    <tr key={history.id}>
-                        <td>{history.changedAt.replace('T', ' ').slice(0, 16)}</td>
-                        <td>
-                            {history.fromStatus ? `${STATUS_LABEL[history.fromStatus]} → ` : ''}
-                            {STATUS_LABEL[history.toStatus]}
-                        </td>
-                        <td>{ROLE_LABEL[history.changedByRole]}</td>
-                        <td>{history.note}</td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-            <button onClick={() => navigate('/reports')}>목록으로</button>
-        </div>
+            </div>
+
+            <div className="detail-grid">
+                <section className="panel">
+                    {/* 처리 단계: 지난 단계는 체크, 현재 단계는 강조 */}
+                    <div className="panel-section">
+                        <ol className="stepper">
+                            {STEPS.map((step, index) => {
+                                const done = index < currentStep || report.status === 'DONE'
+                                const current = !done && index === currentStep
+
+                                return (
+                                    <li
+                                        key={step}
+                                        className={`step${done ? ' is-done' : ''}${current ? ' is-current' : ''}`}
+                                    >
+                                        <span className="step-dot">
+                                            {done ? (
+                                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path d="M5 12.5l4.5 4.5L19 7.5" />
+                                                </svg>
+                                            ) : (
+                                                index + 1
+                                            )}
+                                        </span>
+                                        <span className="step-label">{STATUS_LABEL[step]}</span>
+                                    </li>
+                                )
+                            })}
+                        </ol>
+                    </div>
+
+                    <div className="panel-section">
+                        <dl className="info-grid">
+                            <div>
+                                <dt>위치</dt>
+                                <dd>{report.facilityName} {report.detailLocation}</dd>
+                            </div>
+                            <div>
+                                <dt>고장 유형</dt>
+                                <dd>{FACILITY_TYPE_LABEL[report.facilityType]}</dd>
+                            </div>
+                            <div>
+                                <dt>등록일</dt>
+                                <dd>{report.createdAt.replace('T', ' ').slice(0, 16)}</dd>
+                            </div>
+                            <div>
+                                <dt>수정일</dt>
+                                <dd>{report.updatedAt.replace('T', ' ').slice(0, 16)}</dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    <div className="panel-section">
+                        <h2 className="panel-title">신고 내용</h2>
+                        <p className="content-text">{report.content}</p>
+                    </div>
+                </section>
+
+                <aside className="detail-side">
+                    {canChangeStatus && nextStatus && (
+                        <section className="panel panel-section action-panel">
+                            <h2 className="panel-title">상태 변경</h2>
+                            <p className="action-current">
+                                현재 <b>{STATUS_LABEL[report.status]}</b> 단계
+                            </p>
+                            <div className="action-form">
+                                <input
+                                    className="input"
+                                    type="text"
+                                    placeholder="처리 메모 (선택)"
+                                    value={note}
+                                    onChange={(e) => setNote(e.target.value)}
+                                />
+                                {actionError && <p className="form-error">{actionError}</p>}
+                                <button
+                                    type="button"
+                                    className="btn btn-primary btn-block"
+                                    onClick={handleChangeStatus}
+                                    disabled={changing}
+                                >
+                                    {STATUS_LABEL[nextStatus]} 단계로 변경
+                                </button>
+                            </div>
+                        </section>
+                    )}
+
+                    <section className="panel panel-section">
+                        <h2 className="panel-title">처리 이력</h2>
+                        {histories.length === 0 ? (
+                            <p className="empty">아직 처리 이력이 없습니다.</p>
+                        ) : (
+                            <ol className="timeline">
+                                {histories.map((history) => (
+                                    <li key={history.id} className="timeline-item">
+                                        <div className="timeline-head">
+                                            <span className="timeline-status">
+                                                {history.fromStatus ? `${STATUS_LABEL[history.fromStatus]} → ` : ''}
+                                                {STATUS_LABEL[history.toStatus]}
+                                            </span>
+                                            <span className="timeline-role">{ROLE_LABEL[history.changedByRole]}</span>
+                                        </div>
+                                        <div className="timeline-time">
+                                            {history.changedAt.replace('T', ' ').slice(0, 16)}
+                                        </div>
+                                        {history.note && <p className="timeline-note">{history.note}</p>}
+                                    </li>
+                                ))}
+                            </ol>
+                        )}
+                    </section>
+                </aside>
+            </div>
+        </>
     )
 }
 
